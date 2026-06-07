@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polaroid Memory</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #E0F2FE; /* Pastel blue background */
+            height: 100vh;
+            display: flex;
+            flex-direction: column; 
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* --- TOP HEADER STYLING --- */
+        .top-header {
+            text-align: center;
+            margin-top: 20px;
+            font-family: 'Brush Script MT', 'Comic Sans MS', cursive;
+            font-size: 3rem;
+            font-weight: bold;
+            color: #0369A1; 
+            z-index: 30;
+            width: 100%;
+        }
+
+        #app-container {
+            position: relative;
+            width: 100vw;
+            height: calc(100vh - 80px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- RETRO POLAROID 1000 CAMERA STYLING --- */
+        .camera-wrapper {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+            z-index: 2;
+            top: 20%; 
+        }
+
+        .flash-bar {
+            width: 140px;
+            height: 35px;
+            background: #bce3f2;
+            border: 4px solid #222;
+            border-bottom: none;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 5px;
+        }
+        
+        .flash-bulb {
+            width: 22px;
+            height: 18px;
+            background: #e1f5fe;
+            border: 2px solid #222;
+            border-radius: 3px;
+        }
+
+        .camera {
+            width: 240px;
+            height: 240px;
+            background: #fdfbf7;
+            border: 5px solid #222;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .camera-top {
+            width: 100%;
+            height: 75px;
+            background: #3a3a3a;
+            border-bottom: 5px solid #222;
+            position: relative;
+        }
+
+        .shutter-btn {
+            width: 30px;
+            height: 30px;
+            background: #e63946;
+            border: 4px solid #222;
+            border-radius: 50%;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
+        }
+
+        .viewfinder {
+            width: 24px;
+            height: 24px;
+            background: #1a1a1a;
+            border: 4px solid #222;
+            border-radius: 4px;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+        }
+
+        .rainbow-stripe {
+            position: absolute;
+            top: 70px;
+            bottom: 40px;
+            width: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            z-index: 1;
+        }
+        .stripe-color { flex: 1; height: 100%; }
+        .s-red { background: #ff3b30; }
+        .s-orange { background: #ff9500; }
+        .s-yellow { background: #ffcc00; }
+        .s-green { background: #4cd964; }
+        .s-blue { background: #5ac8fa; }
+
+        .lens {
+            width: 115px;
+            height: 115px;
+            background: #111;
+            border-radius: 50%;
+            position: absolute;
+            top: 125px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 6px solid #222;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.1);
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lens-glass {
+            width: 65px;
+            height: 65px;
+            background: #1c2d37;
+            border-radius: 50%;
+            border: 5px solid #333;
+            position: relative;
+        }
+
+        .lens-glass::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 15px;
+            height: 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+        }
+
+        .output-slot {
+            width: 180px;
+            height: 15px;
+            background: #1a1a1a;
+            border: 4px solid #222;
+            border-bottom: none;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+        }
+
+        /* --- POLAROID PHOTO STYLING --- */
+        .polaroid-container {
+            position: absolute;
+            top: 210px;
+            z-index: 1;
+            transform-origin: top center;
+            transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1), top 1s, left 1s;
+        }
+
+        .polaroid {
+            width: 210px;
+            height: 255px;
+            background: #ffffff;
+            padding: 15px 15px 45px 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            cursor: pointer;
+            position: relative;
+            transition: box-shadow 0.5s ease;
+        }
+
+        .photo-frame {
+            width: 180px;
+            height: 180px;
+            background: #222; 
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Positions text cleanly over the top of the processing cover image */
+        .print-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ffffff; /* Shifted to white to read perfectly against the photo frame */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* Drop shadow so it pops clearly */
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            position: absolute;
+            z-index: 4; /* Keeps text layered above the image layer */
+        }
+
+        .cover-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block; /* Updated to display immediately upon camera slideout print */
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+        }
+
+        .photo-frame video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 3;
+        }
+
+        .play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid #222;
+            border-radius: 50%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 5;
+        }
+
+        .play-btn::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-left: 16px solid #222;
+            margin-left: 4px;
+        }
+
+        /* --- ANIMATIONS & INTERACTIVE STATES --- */
+        .print-animation {
+            animation: printOut 3.5s forwards cubic-bezier(0.1, 0.8, 0.25, 1);
+        }
+
+        @keyframes printOut {
+            0% {
+                transform: translateY(-220px) scaleY(0.1);
+                opacity: 0.8;
+                filter: sepia(0.8) blur(1px);
+            }
+            40% {
+                transform: translateY(20px) scaleY(1);
+                filter: sepia(0.4) blur(0.5px);
+            }
+            100% {
+                transform: translateY(110px) scale(1);
+                opacity: 1;
+                filter: sepia(0) blur(0);
+            }
+        }
+
+        .glow {
+            box-shadow: 0 0 25px 8px rgba(255, 105, 180, 0.5), 0 10px 25px rgba(0,0,0,0.15) !important;
+        }
+
+        .polaroid-container.picked-up {
+            position: relative;
+            top: 0 !important;
+            left: 0 !important;
+            transform: scale(1.6) rotate(0deg) !important;
+            z-index: 10;
+        }
+
+        .polaroid-container.picked-up .play-btn {
+            display: flex;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .camera-hidden {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        .fade-out {
+            opacity: 0;
+            transform: scale(1.3) !important;
+            transition: opacity 1.5s ease, transform 1.5s ease !important;
+            pointer-events: none;
+        }
+
+        /* --- FINAL TEXT STYLING --- */
+        .love-text {
+            position: absolute;
+            font-family: 'Brush Script MT', 'Comic Sans MS', cursive; 
+            font-size: 3.5rem; 
+            color: #d63384;
+            font-weight: bold;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            width: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .love-text.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="top-header">aju&nuva</h1>
+
+    <div id="app-container">
+        
+        <div class="camera-wrapper" id="cameraWrapper">
+            <div class="flash-bar">
+                <div class="flash-bulb"></div>
+                <div class="flash-bulb"></div>
+                <div class="flash-bulb"></div>
+                <div class="flash-bulb"></div>
+            </div>
+            <div class="camera">
+                <div class="camera-top">
+                    <div class="shutter-btn"></div>
+                    <div class="viewfinder"></div>
+                </div>
+                <div class="rainbow-stripe">
+                    <div class="stripe-color s-red"></div>
+                    <div class="stripe-color s-orange"></div>
+                    <div class="stripe-color s-yellow"></div>
+                    <div class="stripe-color s-green"></div>
+                    <div class="stripe-color s-blue"></div>
+                </div>
+                <div class="lens">
+                    <div class="lens-glass"></div>
+                </div>
+                <div class="output-slot"></div>
+            </div>
+        </div>
+
+        <div class="polaroid-container print-animation" id="polaroidContainer">
+            <div class="polaroid" id="polaroidCard">
+                <div class="photo-frame" id="photoFrame">
+                    <span class="print-text" id="printText">click here</span>
+                    
+                    <img class="cover-image" id="coverImg" src="image2.png.png" alt="Memory Cover">
+                    
+                    <video id="memoryVideo" playsinline>
+                        <source src="video2.mov.MOV" type="video/quicktime">
+                        <source src="video2.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+
+                    <div class="play-btn" id="playBtn"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="love-text" id="loveText">i love you aju🥹💋</div>
+
+    </div>
+
+    <script>
+        const polaroidContainer = document.getElementById('polaroidContainer');
+        const polaroidCard = document.getElementById('polaroidCard');
+        const cameraWrapper = document.getElementById('cameraWrapper');
+        const photoFrame = document.getElementById('photoFrame');
+        const printText = document.getElementById('printText');
+        const coverImg = document.getElementById('coverImg');
+        const memoryVideo = document.getElementById('memoryVideo');
+        const playBtn = document.getElementById('playBtn');
+        const loveText = document.getElementById('loveText');
+
+        let isPickedUp = false;
+
+        polaroidContainer.addEventListener('animationend', () => {
+            polaroidCard.classList.add('glow');
+        });
+
+        polaroidCard.addEventListener('click', () => {
+            if (!isPickedUp) {
+                isPickedUp = true;
+                polaroidContainer.classList.remove('print-animation');
+                polaroidCard.classList.remove('glow');
+                cameraWrapper.classList.add('camera-hidden');
+                polaroidContainer.classList.add('picked-up');
+                
+                // Hide prompt text when scaling up
+                printText.style.display = 'none';
+            }
+        });
+
+        playBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playBtn.style.opacity = '0';
+            playBtn.style.pointerEvents = 'none';
+            coverImg.style.display = 'none'; 
+            memoryVideo.style.display = 'block';
+            memoryVideo.play();
+        });
+
+        memoryVideo.addEventListener('ended', () => {
+            polaroidContainer.classList.add('fade-out');
+            setTimeout(() => {
+                polaroidContainer.style.display = 'none';
+                loveText.classList.add('show');
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
